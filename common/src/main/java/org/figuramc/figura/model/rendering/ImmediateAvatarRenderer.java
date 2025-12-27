@@ -1,5 +1,6 @@
 package org.figuramc.figura.model.rendering;
 
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
@@ -310,7 +311,11 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
             boolean renderPivotParts = part.parentType.isPivot && allowPivotParts;
 
             if (renderPivot || renderTasks || renderPivotParts) {
-                // fix pivots
+                 // fix light and overlay
+                PartCustomization parent = customizationStack.peek();
+                int light = parent.light != null ? parent.light : LightTexture.FULL_BRIGHT;
+                int overlay = parent.overlay != null ? parent.overlay : OverlayTexture.NO_OVERLAY;
+		// fix pivots
                 FiguraMod.pushProfiler("fixMatricesPivot");
 
                 FiguraVec3 pivot = custom.getPivot().copy().add(custom.getOffsetPivot());
@@ -329,8 +334,6 @@ public class ImmediateAvatarRenderer extends AvatarRenderer {
                 // render tasks
                 if (renderTasks) {
                     FiguraMod.popPushProfiler("renderTasks");
-                    int light = peek.light;
-                    int overlay = peek.overlay;
                     interceptRendersIntoFigura = false;
                     for (RenderTask task : part.renderTasks.values()) {
                         if (!task.shouldRender())
